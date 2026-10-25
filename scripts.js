@@ -2,12 +2,12 @@
 // Setiap link adalah object. Semua link disimpan dalam satu array.
 const links = [
   { id: 1, title: "GitHub", url: "https://github.com/abihanan", category: "sosmed", icon: "🐙" },
-  { id: 2, title: "Instagram", url: "https://instagram.com/abbihanan", category: "sosmed", icon: "📸" },
+  { id: 2, title: "Instagram", url: "https://instagram.com/ahmadabihanan", category: "sosmed", icon: "📸" },
   { id: 3, title: "LinkedIn", url: "https://linkedin.com/in/ahmadabihanan", category: "sosmed", icon: "💼" },
-  { id: 4, title: "Portofolio", url: "https://abih.my.id/portfolio", category: "project", icon: "🎨" },
-  { id: 5, title: "Link Page Ini (Repo)", url: "https://github.com/abihanan/link-page", category: "project", icon: "🧩" },
-  { id: 6, title: "Catatan Kursus", url: "https://abih.my.id/catatan", category: "project", icon: "📓" },
-  { id: 7, title: "Email", url: "mailto:halo@abih.my.id", category: "kontak", icon: "✉️" },
+  { id: 4, title: "Portofolio", url: "https://example.com/portfolio", category: "project", icon: "🎨" },
+  { id: 5, title: "Link Page Ini (Repo)", url: "https://github.com/ahmadabihanan/link-page", category: "project", icon: "🧩" },
+  { id: 6, title: "Catatan Kursus", url: "https://example.com/catatan", category: "project", icon: "📓" },
+  { id: 7, title: "Email", url: "mailto:halo@example.com", category: "kontak", icon: "✉️" },
   { id: 8, title: "WhatsApp", url: "https://wa.me/6281234567890", category: "kontak", icon: "💬" }
 ];
 
@@ -55,6 +55,24 @@ function renderLinks(category) {
   });
 }
 
+let currentCategory = "semua";
+
+const linkCount = document.querySelector("#link-count");
+const emptyState = document.querySelector("#empty-state");
+
+function updateCount() {
+    const total = linkList.children.length;
+    linkCount.textContent = "Menampilkan " + total + " link";
+}
+
+function updateEmptyState() {
+    if (linkList.children.length === 0) {
+        emptyState.classList.remove("hidden");
+    } else {
+        emptyState.classList.add("hidden");
+    }
+}
+
 // ===== FILTER =====
 const filterTabs = document.querySelector("#filter-tabs");
 const tabButtons = filterTabs.querySelectorAll("button");
@@ -69,6 +87,10 @@ function handleFilterClick(clickedButton) {
     }
   });
 
+  currentCategory = clickedButton.dataset.category;
+  renderLinks(currentCategory);
+  updateCount();
+  updateEmptyState();
   // 2. Tampilkan ulang link sesuai kategori tombol
   renderLinks(clickedButton.dataset.category);
 }
@@ -106,6 +128,57 @@ themeToggle.addEventListener("click", function () {
   updateThemeButton();
 });
 
+// ===== FORM TAMBAH LINK =====
+const addLinkForm = document.querySelector("#add-link-form");
+const formError = document.querySelector("#form-error");
+
+function showFormError(message) {
+    formError.textContent = message;
+    formError.classList.remove("hidden");
+}
+
+function hideFormError() {
+    formError.textContent = "";
+    formError.classList.add("hidden");
+}
+
+function isValidUrl(url) {
+    return url.startsWith("http://"
+    ) || url.startsWith("https://") || url.startsWith("mailto:");
+}
+
+addLinkForm.addEventListener("submit", function (event) {
+    event.preventDefault(); // cegah halaman reload saat form dikirim
+
+    const title = document.querySelector("#link-title").value.trim();
+    const url = document.querySelector("#link-url").value.trim();
+    const category = document.querySelector("#link-category").value;
+
+    if (title === "") {
+        showFormError("Judul tidak boleh kosong.");
+        return;
+    }
+    if (!isValidUrl(url)) {
+        showFormError("URL harus diawali http://, https://, atau mailto:");
+        return;
+    }
+
+    hideFormError();
+
+    // 1. Tambahkan ke data
+    links.push({ id: Date.now(), title: title, url: url, category: category, icon: "🔗" });
+
+    // 2. Kosongkan form
+    addLinkForm.reset();
+
+    // 3. Perbarui tampilan
+    renderLinks(currentCategory);
+    updateCount();
+    updateEmptyState();
+});
+
 // ===== MULAI =====
 renderLinks("semua");
+updateCount();
+updateEmptyState(); 
 updateThemeButton();
